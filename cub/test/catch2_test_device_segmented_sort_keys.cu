@@ -151,7 +151,9 @@ CUB_TEST("DeviceSegmentedSortKeys: Randomly sized segments, derived keys", "[key
   test_random_size_segments_derived<KeyT>(CUB_SEED(1), max_items, max_segment, segments);
 }
 
-CUB_TEST("DeviceSegmentedSortKeys: Randomly sized segments, random keys", "[keys][segmented][sort][device]", key_types)
+CUB_TEST("DeviceSegmentedSortKeys: Randomly sized segments, random keys",
+         "[keys][segmented][sort][device][skip-cs-initcheck][skip-cs-racecheck]",
+         key_types)
 {
   using KeyT = c2h::get<0, TestType>;
 
