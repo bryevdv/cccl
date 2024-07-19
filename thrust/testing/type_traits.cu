@@ -5,7 +5,13 @@
 #include <thrust/iterator/iterator_traits.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/pair.h>
+#include <thrust/tuple.h>
 #include <thrust/type_traits/is_contiguous_iterator.h>
+
+#include <cuda/std/complex>
+#include <cuda/std/tuple>
+#include <cuda/std/utility>
 
 #include <unittest/unittest.h>
 
@@ -146,3 +152,32 @@ void TestIsCommutative()
   }
 }
 DECLARE_UNITTEST(TestIsCommutative);
+
+void TestTriviallyRelocatable()
+{
+  static_assert(thrust::is_trivially_relocatable<int>::value, "");
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+  static_assert(thrust::is_trivially_relocatable<__half>::value, "");
+  static_assert(thrust::is_trivially_relocatable<int1>::value, "");
+  static_assert(thrust::is_trivially_relocatable<int2>::value, "");
+  static_assert(thrust::is_trivially_relocatable<int3>::value, "");
+  static_assert(thrust::is_trivially_relocatable<int4>::value, "");
+  static_assert(thrust::is_trivially_relocatable<__int128>::value, "");
+#endif // THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+  static_assert(thrust::is_trivially_relocatable<thrust::complex<float>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<::cuda::std::complex<float>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<thrust::pair<int, int>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<::cuda::std::pair<int, int>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<thrust::tuple<int, float, char>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<::cuda::std::tuple<int, float, char>>::value, "");
+  static_assert(thrust::is_trivially_relocatable<
+                  ::cuda::std::tuple<thrust::pair<int, thrust::tuple<int, ::cuda::std::tuple<>>>,
+                                     thrust::tuple<::cuda::std::pair<int, thrust::tuple<>>, int>>>::value,
+                "");
+
+  static_assert(!thrust::is_trivially_relocatable<thrust::pair<int, std::string>>::value, "");
+  static_assert(!thrust::is_trivially_relocatable<::cuda::std::pair<int, std::string>>::value, "");
+  static_assert(!thrust::is_trivially_relocatable<thrust::tuple<int, float, std::string>>::value, "");
+  static_assert(!thrust::is_trivially_relocatable<::cuda::std::tuple<int, float, std::string>>::value, "");
+};
+DECLARE_UNITTEST(TestTriviallyRelocatable);
