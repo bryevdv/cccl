@@ -749,3 +749,16 @@ void TestInclusiveScanWithUserDefinedType()
   ASSERT_EQUAL(static_cast<Int>(vec.back()).i, 5);
 }
 DECLARE_UNITTEST(TestInclusiveScanWithUserDefinedType);
+
+void TestInclusiveScanWithNonCommutativeOp()
+{
+  const thrust::device_vector<int> input = {1, 3, -2, 4, -5};
+  thrust::device_vector<int> output(5);
+
+  thrust::inclusive_scan(input.begin(), input.end(), output.begin(), thrust::minus<int>{});
+  ASSERT_EQUAL(output, (thrust::device_vector<int>{1, -2, 0, -4, 1}));
+
+  thrust::exclusive_scan(input.begin(), input.end(), output.begin(), -200, thrust::minus<int>{});
+  ASSERT_EQUAL(output, (thrust::device_vector<int>{-200, -201, -204, -202, -206}));
+}
+DECLARE_UNITTEST(TestInclusiveScanWithNonCommutativeOp);
